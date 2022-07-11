@@ -93,7 +93,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
             url = clean("http","https",url)
         url = clean(r"PRP", ";", url)
         websitename = 'Booking'
-        proxyip = "['"+clean(r"PP","','",proxyip)+"']"
+        proxyip = "['"+clean(r"HR","@",clean(r"PP","','",proxyip))+"']"
         proxyip = ast.literal_eval(proxyip)
         print('proxyip:',proxyip)
         RateDate = regMatch('checkin=(\d+\-\d+\-\d+).*?checkout', url)
