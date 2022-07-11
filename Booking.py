@@ -424,6 +424,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
             df = pd.DataFrame(mydata)
             parquet_append(prname, df)
             s3.upload_file(f'{prname}', bucket_name, f'{folderdate}/{userid}/{shopid}/{prname}')
+            os.remove(prname)
         else:
             return None
     except Exception as e:
