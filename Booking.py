@@ -420,7 +420,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
                     else:
                         return None
         if hotelcode_array!=[]:
-            mydata = {"HotelCode": hotelcode_array,"SubjectHotelcode":subjecthotelcode_array,"WebsiteName":websitename_array,"dtcollected":dtcollected_array,"RateDate":Ratedate_array,"Los": LOS_array,"RoomType": Roomtype_array,"OnsiteRate": Onsiterate_array,"RateType": Ratedate_array,"MealInclusion Type": Mealinclusion_array,"MaxOccupancy": Maxocc_array,"Sourceurl": Sourceurl_array,"Currency":price_currency_array,"Statuscode":Statuscode_array}
+            mydata = {"HotelCode": hotelcode_array,"SubjectHotelcode":subjecthotelcode_array,"WebsiteName":websitename_array,"dtcollected":dtcollected_array,"RateDate":Ratedate_array,"Los": LOS_array,"RoomType": Roomtype_array,"OnsiteRate": Onsiterate_array,"RateType": ratetype_array,"MealInclusion Type": Mealinclusion_array,"MaxOccupancy": Maxocc_array,"Sourceurl": Sourceurl_array,"Currency":price_currency_array,"Statuscode":Statuscode_array}
             df = pd.DataFrame(mydata)
             parquet_append(prname, df)
             s3.upload_file(f'{prname}', bucket_name, f'{folderdate}/{userid}/{shopid}/{prname}')
