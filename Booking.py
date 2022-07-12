@@ -1,4 +1,4 @@
-import requests,re,json,random, boto3, os, datetime, pytz, sys, ast
+import requests,re,json,random, boto3, os, datetime, pytz, sys, ast, time
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pandas as pd
@@ -95,8 +95,10 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
         websitename = 'Booking'
         proxyip = "['"+clean(r"AR","!",clean(r"HR","@",clean(r"PP","','",proxyip)))+"']"
         proxyip = ast.literal_eval(proxyip)
-        print('proxyip:',proxyip)
+        #print('proxyip:',proxyip)
         RateDate = regMatch('checkin=(\d+\-\d+\-\d+).*?checkout', url)
+        start    = time.time()
+        print('start time:',hotelcode,RateDate,start)
         Checkin = datetime.datetime.strptime(str(RateDate),'%Y-%m-%d').strftime('%Y%m%d')
         LOS = (datetime.datetime.strptime(re.search(r"checkin=(\d+\-\d+\-\d+).*?checkout=(\d+\-\d+\-\d+)", url).group(2), "%Y-%m-%d") - datetime.datetime.strptime(re.search(r"checkin=(\d+\-\d+\-\d+).*?checkout=(\d+\-\d+\-\d+)", url).group(1), "%Y-%m-%d")).days
         prname = str(hotelcode)+'_'+str(Checkin)+'_.parquet'
@@ -127,7 +129,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
         except Exception as e:
             print('error:',e)
             return None
-        print("scode: ",hml.status_code)
+        #print("scode: ",hml.status_code)
         if hml.status_code != 200:
             return None
         
@@ -420,14 +422,16 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
                         insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
                     else:
                         return None
-        print("hotelcode_array:",hotelcode_array)
+        
         if hotelcode_array!=[]:
             mydata = {"HotelCode": hotelcode_array,"SubjectHotelcode":subjecthotelcode_array,"WebsiteName":websitename_array,"dtcollected":dtcollected_array,"RateDate":Ratedate_array,"Los": LOS_array,"RoomType": Roomtype_array,"OnsiteRate": Onsiterate_array,"RateType": ratetype_array,"MealInclusion Type": Mealinclusion_array,"MaxOccupancy": Maxocc_array,"Sourceurl": Sourceurl_array,"Currency":price_currency_array,"Statuscode":Statuscode_array}
             df = pd.DataFrame(mydata)
             parquet_append(prname, df)
-            print("mydata:",mydata)
             s3.upload_file(f'{prname}', bucket_name, f'{folderdate}/{userid}/{shopid}/{prname}')
             os.remove(prname)
+            end     = time.time()
+            elapsed = end - start
+            print('end and elapsed time:',hotelcode,RateDate,end, elapsed)
         else:
             return None
     except Exception as e:
@@ -438,7 +442,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
 
 
 script, proxyip, shopid, subhotelcode, hotelcode, url, userid=sys.argv
-print('url:',url)
+# print('url:',url)
 # url = 'https://www.booking.com/hotel/eg/jungle-park.en-gb.html?checkin=2022-08-21;checkout=2022-08-28;group_adults=1;lang=en-us;selected_currency=EUR;changed_currency=1;hotelid=267353'
 # shopid = 1
 # subhotelcode = 2
