@@ -9,6 +9,7 @@ now = datetime.datetime.now()
 now = now.replace(tzinfo = local)
 tz = pytz.timezone('Pacific/Auckland')
 dtcollected = re.sub(r"\s.*","",str(now.astimezone(tz)))
+file_dt = re.sub(r"\:|\.","_",re.sub(r"^.*?\s|\+.*","",str(now.astimezone(tz))))
 folderdate = now.astimezone(tz).strftime("%Y%m%d")
 
 bucket_name = "picasso"
@@ -97,6 +98,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
             url = clean("http","https",url)
         # url = clean(r"PRP", ";", url)
         websitename = 'Booking'
+        websitecode = 2
         # proxyip = "['"+clean(r"AR","!",clean(r"HR","@",clean(r"PP","','",proxyip)))+"']"
         proxyip = ast.literal_eval(proxyip)
         # print('proxyip:',proxyip)
@@ -105,7 +107,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         # print('start time:',hotelcode,RateDate,start)
         Checkin = datetime.datetime.strptime(str(RateDate),'%Y-%m-%d').strftime('%Y%m%d')
         LOS = (datetime.datetime.strptime(re.search(r"checkin=(\d+\-\d+\-\d+).*?checkout=(\d+\-\d+\-\d+)", url).group(2), "%Y-%m-%d") - datetime.datetime.strptime(re.search(r"checkin=(\d+\-\d+\-\d+).*?checkout=(\d+\-\d+\-\d+)", url).group(1), "%Y-%m-%d")).days
-        prname = str(hotelcode)+'_'+str(Checkin)+'_.parquet'
+        prname = str(hotelcode)+'_'+str(websitecode)+'_'+str(Checkin)+'_'+str(file_dt)+'.parquet'
         if not os.path.exists(prname):
             df = pd.DataFrame({"HotelCode": [''],"SubjectHotelcode":[''],"WebsiteName":[''],"dtcollected":[''],"RateDate":[''],"Los": [''],"RoomType": [''],"OnsiteRate": [''],"RateType": [''],"MealInclusion Type": [''],"MaxOccupancy": [''],"Sourceurl":[''],"Currency":[''],"Statuscode":[''],"Yourhotel":[''],"Hotelname":['']})
             table = pa.Table.from_pandas(df)
