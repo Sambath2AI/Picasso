@@ -29,6 +29,8 @@ Onsiterate_array = []
 shopid_array = []
 hotelcode_array = []
 subjecthotelcode_array = []
+subjecthotelname_array = []
+hotelname_array = []
 websitename_array = []
 Maxocc_array = []
 dtcollected_array = []
@@ -37,7 +39,7 @@ LOS_array = []
 Sourceurl_array = []
 Statuscode_array = []
 
-def insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,Ratedate,los,sourceurl,Statuscode):
+def insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,Ratedate,los,sourceurl,Statuscode,subhotelname,hotelname):
     Roomtype_array.append(Roomtype)
     Onsiterate_array.append(Onsiterate)
     Mealinclusion_array.append(Mealinclusion)
@@ -53,6 +55,8 @@ def insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxo
     LOS_array.append(los)
     Sourceurl_array.append(sourceurl)
     Statuscode_array.append(Statuscode)
+    subjecthotelname_array.append(subhotelname)
+    hotelname_array.append(hotelname)
     # print(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,Ratedate,los,sourceurl)
 
 def parquet_append(filepath:'Path' or str, df: pd.DataFrame) -> None:
@@ -87,28 +91,29 @@ Spaceblock_regex_seven = '(?s)class="bui-alert bui-alert--error bui-alert--lar.*
 Spaceblock_regex_eight = '<div class="bui-alert bui-alert--error".*?>\s*(.*?)\s*</p>\s*</div>'
 
 
-def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
+def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelname, hotelname):
     try:
         if "https" not in url:
             url = clean("http","https",url)
-        url = clean(r"PRP", ";", url)
+        # url = clean(r"PRP", ";", url)
         websitename = 'Booking'
-        proxyip = "['"+clean(r"AR","!",clean(r"HR","@",clean(r"PP","','",proxyip)))+"']"
+        # proxyip = "['"+clean(r"AR","!",clean(r"HR","@",clean(r"PP","','",proxyip)))+"']"
         proxyip = ast.literal_eval(proxyip)
-        #print('proxyip:',proxyip)
+        # print('proxyip:',proxyip)
         RateDate = regMatch('checkin=(\d+\-\d+\-\d+).*?checkout', url)
-        start    = time.time()
-        print('start time:',hotelcode,RateDate,start)
+        # start    = time.time()
+        # print('start time:',hotelcode,RateDate,start)
         Checkin = datetime.datetime.strptime(str(RateDate),'%Y-%m-%d').strftime('%Y%m%d')
         LOS = (datetime.datetime.strptime(re.search(r"checkin=(\d+\-\d+\-\d+).*?checkout=(\d+\-\d+\-\d+)", url).group(2), "%Y-%m-%d") - datetime.datetime.strptime(re.search(r"checkin=(\d+\-\d+\-\d+).*?checkout=(\d+\-\d+\-\d+)", url).group(1), "%Y-%m-%d")).days
         prname = str(hotelcode)+'_'+str(Checkin)+'_.parquet'
         if not os.path.exists(prname):
-            df = pd.DataFrame({"HotelCode": [''],"SubjectHotelcode":[''],"WebsiteName":[''],"dtcollected":[''],"RateDate":[''],"Los": [''],"RoomType": [''],"OnsiteRate": [''],"RateType": [''],"MealInclusion Type": [''],"MaxOccupancy": [''],"Sourceurl":[''],"Currency":[''],"Statuscode":['']})
+            df = pd.DataFrame({"HotelCode": [''],"SubjectHotelcode":[''],"WebsiteName":[''],"dtcollected":[''],"RateDate":[''],"Los": [''],"RoomType": [''],"OnsiteRate": [''],"RateType": [''],"MealInclusion Type": [''],"MaxOccupancy": [''],"Sourceurl":[''],"Currency":[''],"Statuscode":[''],"Yourhotel":[''],"Hotelname":['']})
             table = pa.Table.from_pandas(df)
             pq.write_table(table, where=(prname))
         head = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
         proxy1 = random.choice(proxyip)
         proxies = {"https": "http://%s"% proxy1}
+        # print('proxies:',proxies)
         try:
             try:
                 hml = requests.get(url, headers=head, proxies = proxies, verify = False, timeout = 5)
@@ -211,7 +216,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
             if hml.history:
                 if (str(hml.history[0]) == '<Response [301]>' or str(hml.history[0]) == '<Response [302]>') and 'searchresults' in hml.url:
                     statuscode = 203
-                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
             if hotelcode_array==[]:
                 hotelid = regMatch(r"b_hotel_id: '(.*?)'",html)
                 url = clean('hotelid=\d+', 'hotelid='+str(hotelid), url)
@@ -312,29 +317,29 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
         if hotelcode_array==[]:
             if 'searchresults' in hml.url:
                 statuscode = 206
-                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
               
             elif re.compile(Spaceblock_regex_third).findall(html):
                 props =  re.search(Spaceblock_regex_third, str(html)).group(1)
                 if "taking reservations on our site right now" in props:
                     statuscode = 203
-                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
         
             elif "This property isn't taking reservations on our site right now" in html  or 'temporarily unavailable on our site, but we found' in html or 'There are no rooms available at this property' in html or 'isnt bookable on our site anymore, but we found some great alternatives for you' in html or "Unfortunately it's not possible to make reservations for this hotel at this time" in html:   
                 statuscode = 203
-                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                 
             elif re.compile(Spaceblock_regex_first).findall(html):
                 if re.compile(Spaceblock_regex_first).findall(html):
                     statuscode = 202
-                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
             elif "For your check-in date, there's a minimum length of stay of" in html:
                 statuscode = 202
-                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
             
             elif "Minimum stay for check-in date is" in html:
                 statuscode = 202
-                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
             else:
                 if re.compile(r"(?s)b_rooms_available_and_soldout:\s*(.*?\])\s*,\s*b_.*?photo_pid:").findall(html):
                     Curr_reg = re.search("b_selected_currency:\s*'(.*?)'", html) 
@@ -402,36 +407,37 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
                                     statuscode = 200
                                 else:
                                     statuscode = 201
-                                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                                     
                 else:
                     statuscode = 202
                     if re.compile(Spaceblock_regex_second).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                     elif re.compile(Spaceblock_regex_third).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                     elif re.compile(Spaceblock_regex_four).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                     elif re.compile(Spaceblock_regex_five).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                     elif re.compile(Spaceblock_regex_six).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                     elif re.compile(Spaceblock_regex_seven).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                     elif re.compile(Spaceblock_regex_eight).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode)
+                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                     else:
                         return None
         
         if hotelcode_array!=[]:
-            mydata = {"HotelCode": hotelcode_array,"SubjectHotelcode":subjecthotelcode_array,"WebsiteName":websitename_array,"dtcollected":dtcollected_array,"RateDate":Ratedate_array,"Los": LOS_array,"RoomType": Roomtype_array,"OnsiteRate": Onsiterate_array,"RateType": ratetype_array,"MealInclusion Type": Mealinclusion_array,"MaxOccupancy": Maxocc_array,"Sourceurl": Sourceurl_array,"Currency":price_currency_array,"Statuscode":Statuscode_array}
+            mydata = {"HotelCode": hotelcode_array,"SubjectHotelcode":subjecthotelcode_array,"WebsiteName":websitename_array,"dtcollected":dtcollected_array,"RateDate":Ratedate_array,"Los": LOS_array,"RoomType": Roomtype_array,"OnsiteRate": Onsiterate_array,"RateType": ratetype_array,"MealInclusion Type": Mealinclusion_array,"MaxOccupancy": Maxocc_array,"Sourceurl": Sourceurl_array,"Currency":price_currency_array,"Statuscode":Statuscode_array,"Yourhotel":subjecthotelname_array,"Hotelname":hotelname_array}
             df = pd.DataFrame(mydata)
+            # print('mydata:',mydata)
             parquet_append(prname, df)
             s3.upload_file(f'{prname}', bucket_name, f'{folderdate}/{userid}/{shopid}/{prname}')
             os.remove(prname)
-            end     = time.time()
-            elapsed = end - start
-            print('end and elapsed time:',hotelcode,RateDate,end, elapsed)
+            # end     = time.time()
+            # elapsed = end - start
+            # print('end and elapsed time:',hotelcode,RateDate,end, elapsed)
         else:
             return None
     except Exception as e:
@@ -441,7 +447,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid):
         return 204
 
 
-script, proxyip, shopid, subhotelcode, hotelcode, url, userid=sys.argv
+# script, proxyip, shopid, subhotelcode, hotelcode, url, userid=sys.argv
 # print('url:',url)
 # url = 'https://www.booking.com/hotel/eg/jungle-park.en-gb.html?checkin=2022-08-21;checkout=2022-08-28;group_adults=1;lang=en-us;selected_currency=EUR;changed_currency=1;hotelid=267353'
 # shopid = 1
@@ -449,7 +455,7 @@ script, proxyip, shopid, subhotelcode, hotelcode, url, userid=sys.argv
 # hotelcode = 3
 # proxyip = ['media:med!a@50.3.89.3:12345', 'media:med!a@95.181.219.211:12345', 'media:med!a@104.160.14.114:12345', 'media:med!a@95.181.218.242:12345', 'media:med!a@196.196.254.50:12345', 'media:med!a@196.196.220.155:12345', 'media:med!a@196.196.220.204:12345', 'media:med!a@181.214.89.129:12345', 'media:med!a@196.196.254.51:12345', 'media:med!a@185.46.116.224:12345', 'media:med!a@181.214.89.127:12345', 'media:med!a@5.157.29.14:12345', 'media:med!a@50.3.89.91:12345', 'media:med!a@181.214.89.77:12345', 'media:med!a@50.3.89.4:12345', 'media:med!a@95.181.217.63:12345', 'media:med!a@185.46.119.166:12345', 'media:med!a@5.157.23.227:12345', 'media:med!a@165.231.130.32:12345', 'media:med!a@95.181.218.111:12345', 'media:med!a@50.3.89.203:12345', 'media:med!a@165.231.130.68:12345', 'media:med!a@50.3.91.5:12345', 'media:med!a@181.214.89.68:12345', 'media:med!a@165.231.130.130:12345', 'media:med!a@185.46.118.151:12345', 'media:med!a@185.46.117.170:12345', 'media:med!a@196.196.169.200:12345', 'media:med!a@185.46.117.179:12345', 'media:med!a@5.157.29.161:12345', 'media:med!a@50.3.136.140:12345', 'media:med!a@50.3.89.8:12345', 'media:med!a@50.3.91.187:12345', 'media:med!a@165.231.130.141:12345', 'media:med!a@5.157.29.193:12345', 'media:med!a@165.231.225.111:12345', 'media:med!a@165.231.227.133:12345', 'media:med!a@196.196.254.207:12345', 'media:med!a@165.231.130.210:12345', 'media:med!a@95.181.219.209:12345', 'media:med!a@104.160.14.214:12345', 'media:med!a@104.160.14.113:12345', 'media:med!a@104.160.14.170:12345', 'media:med!a@196.196.220.251:12345', 'media:med!a@196.196.220.159:12345', 'media:med!a@196.196.254.38:12345', 'media:med!a@181.214.89.84:12345', 'media:med!a@5.157.29.59:12345', 'media:med!a@95.181.218.33:12345', 'media:med!a@95.181.217.74:12345']
 #
-fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid)        
+# fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid)        
             
 
 
