@@ -1,4 +1,4 @@
-import requests,re,json,random, boto3, os, datetime, pytz, sys, ast, time
+import requests,re,json,random, boto3, os, datetime, pytz, sys, ast
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pandas as pd
@@ -107,11 +107,6 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         # print('start time:',hotelcode,RateDate,start)
         Checkin = datetime.datetime.strptime(str(RateDate),'%Y-%m-%d').strftime('%Y%m%d')
         LOS = (datetime.datetime.strptime(re.search(r"checkin=(\d+\-\d+\-\d+).*?checkout=(\d+\-\d+\-\d+)", url).group(2), "%Y-%m-%d") - datetime.datetime.strptime(re.search(r"checkin=(\d+\-\d+\-\d+).*?checkout=(\d+\-\d+\-\d+)", url).group(1), "%Y-%m-%d")).days
-        prname = str(hotelcode)+'_'+str(websitecode)+'_'+str(Checkin)+'_'+str(file_dt)+'.parquet'
-        if not os.path.exists(prname):
-            df = pd.DataFrame({"HotelCode": [''],"SubjectHotelcode":[''],"WebsiteName":[''],"dtcollected":[''],"RateDate":[''],"Los": [''],"RoomType": [''],"OnsiteRate": [''],"RateType": [''],"MealInclusion Type": [''],"MaxOccupancy": [''],"Sourceurl":[''],"Currency":[''],"Statuscode":[''],"Yourhotel":[''],"Hotelname":['']})
-            table = pa.Table.from_pandas(df)
-            pq.write_table(table, where=(prname))
         head = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
         proxy1 = random.choice(proxyip)
         proxies = {"https": "http://%s"% proxy1}
@@ -431,6 +426,11 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                         return None
         
         if hotelcode_array!=[]:
+            prname = str(hotelcode)+'_'+str(websitecode)+'_'+str(Checkin)+'_'+str(file_dt)+'.parquet'
+            if not os.path.exists(prname):
+                df = pd.DataFrame({"HotelCode": [''],"SubjectHotelcode":[''],"WebsiteName":[''],"dtcollected":[''],"RateDate":[''],"Los": [''],"RoomType": [''],"OnsiteRate": [''],"RateType": [''],"MealInclusion Type": [''],"MaxOccupancy": [''],"Sourceurl":[''],"Currency":[''],"Statuscode":[''],"Yourhotel":[''],"Hotelname":['']})
+                table = pa.Table.from_pandas(df)
+                pq.write_table(table, where=(prname))
             mydata = {"HotelCode": hotelcode_array,"SubjectHotelcode":subjecthotelcode_array,"WebsiteName":websitename_array,"dtcollected":dtcollected_array,"RateDate":Ratedate_array,"Los": LOS_array,"RoomType": Roomtype_array,"OnsiteRate": Onsiterate_array,"RateType": ratetype_array,"MealInclusion Type": Mealinclusion_array,"MaxOccupancy": Maxocc_array,"Sourceurl": Sourceurl_array,"Currency":price_currency_array,"Statuscode":Statuscode_array,"Yourhotel":subjecthotelname_array,"Hotelname":hotelname_array}
             df = pd.DataFrame(mydata)
             # print('mydata:',mydata)
@@ -455,10 +455,11 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
 # shopid = 1
 # subhotelcode = 2
 # hotelcode = 3
-# proxyip = ['media:med!a@50.3.89.3:12345', 'media:med!a@95.181.219.211:12345', 'media:med!a@104.160.14.114:12345', 'media:med!a@95.181.218.242:12345', 'media:med!a@196.196.254.50:12345', 'media:med!a@196.196.220.155:12345', 'media:med!a@196.196.220.204:12345', 'media:med!a@181.214.89.129:12345', 'media:med!a@196.196.254.51:12345', 'media:med!a@185.46.116.224:12345', 'media:med!a@181.214.89.127:12345', 'media:med!a@5.157.29.14:12345', 'media:med!a@50.3.89.91:12345', 'media:med!a@181.214.89.77:12345', 'media:med!a@50.3.89.4:12345', 'media:med!a@95.181.217.63:12345', 'media:med!a@185.46.119.166:12345', 'media:med!a@5.157.23.227:12345', 'media:med!a@165.231.130.32:12345', 'media:med!a@95.181.218.111:12345', 'media:med!a@50.3.89.203:12345', 'media:med!a@165.231.130.68:12345', 'media:med!a@50.3.91.5:12345', 'media:med!a@181.214.89.68:12345', 'media:med!a@165.231.130.130:12345', 'media:med!a@185.46.118.151:12345', 'media:med!a@185.46.117.170:12345', 'media:med!a@196.196.169.200:12345', 'media:med!a@185.46.117.179:12345', 'media:med!a@5.157.29.161:12345', 'media:med!a@50.3.136.140:12345', 'media:med!a@50.3.89.8:12345', 'media:med!a@50.3.91.187:12345', 'media:med!a@165.231.130.141:12345', 'media:med!a@5.157.29.193:12345', 'media:med!a@165.231.225.111:12345', 'media:med!a@165.231.227.133:12345', 'media:med!a@196.196.254.207:12345', 'media:med!a@165.231.130.210:12345', 'media:med!a@95.181.219.209:12345', 'media:med!a@104.160.14.214:12345', 'media:med!a@104.160.14.113:12345', 'media:med!a@104.160.14.170:12345', 'media:med!a@196.196.220.251:12345', 'media:med!a@196.196.220.159:12345', 'media:med!a@196.196.254.38:12345', 'media:med!a@181.214.89.84:12345', 'media:med!a@5.157.29.59:12345', 'media:med!a@95.181.218.33:12345', 'media:med!a@95.181.217.74:12345']
-#
-# fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid)        
-            
+# userid = 6
+# proxyip = "['media:med!a@50.3.89.3:12345', 'media:med!a@95.181.219.211:12345', 'media:med!a@104.160.14.114:12345', 'media:med!a@95.181.218.242:12345', 'media:med!a@196.196.254.50:12345', 'media:med!a@196.196.220.155:12345', 'media:med!a@196.196.220.204:12345', 'media:med!a@181.214.89.129:12345', 'media:med!a@196.196.254.51:12345', 'media:med!a@185.46.116.224:12345', 'media:med!a@181.214.89.127:12345', 'media:med!a@5.157.29.14:12345', 'media:med!a@50.3.89.91:12345', 'media:med!a@181.214.89.77:12345', 'media:med!a@50.3.89.4:12345', 'media:med!a@95.181.217.63:12345', 'media:med!a@185.46.119.166:12345', 'media:med!a@5.157.23.227:12345', 'media:med!a@165.231.130.32:12345', 'media:med!a@95.181.218.111:12345', 'media:med!a@50.3.89.203:12345', 'media:med!a@165.231.130.68:12345', 'media:med!a@50.3.91.5:12345', 'media:med!a@181.214.89.68:12345', 'media:med!a@165.231.130.130:12345', 'media:med!a@185.46.118.151:12345', 'media:med!a@185.46.117.170:12345', 'media:med!a@196.196.169.200:12345', 'media:med!a@185.46.117.179:12345', 'media:med!a@5.157.29.161:12345', 'media:med!a@50.3.136.140:12345', 'media:med!a@50.3.89.8:12345', 'media:med!a@50.3.91.187:12345', 'media:med!a@165.231.130.141:12345', 'media:med!a@5.157.29.193:12345', 'media:med!a@165.231.225.111:12345', 'media:med!a@165.231.227.133:12345', 'media:med!a@196.196.254.207:12345', 'media:med!a@165.231.130.210:12345', 'media:med!a@95.181.219.209:12345', 'media:med!a@104.160.14.214:12345', 'media:med!a@104.160.14.113:12345', 'media:med!a@104.160.14.170:12345', 'media:med!a@196.196.220.251:12345', 'media:med!a@196.196.220.159:12345', 'media:med!a@196.196.254.38:12345', 'media:med!a@181.214.89.84:12345', 'media:med!a@5.157.29.59:12345', 'media:med!a@95.181.218.33:12345', 'media:med!a@95.181.217.74:12345']"
+# subhotelname, hotelname = 'sample','ok'
+# fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelname, hotelname)        
+                      
 
 
 
