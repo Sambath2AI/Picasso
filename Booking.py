@@ -131,8 +131,9 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         except Exception as e:
             print('error:',e)
             return None
-        #print("scode: ",hml.status_code)
+        print("scode: ",hml.status_code)
         if hml.status_code != 200:
+            print('return')
             return None
         
         html = hml.content.decode('utf-8')
@@ -196,8 +197,10 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                             proxies = {"https": "http://%s"% proxy1}
                             hml = requests.get(url_check, headers=head, proxies = proxies, verify = False, timeout = 10)
             except Exception as e:
+                print('Error:',e)
                 return None
             if hml.status_code != 200:
+                print('return')
                 return None
         html = hml.content.decode('utf-8')
         
@@ -238,8 +241,10 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                                 proxies = {"https": "http://%s"% proxy1}
                                 hml = requests.get(url, headers=head, proxies = proxies, verify = False, timeout = 10)
                 except Exception as e:
+                    print('Error:',e)
                     return None
                 if hml.status_code != 200:
+                    print('return')
                     return None
                 html = hml.content.decode('utf-8')
                 
