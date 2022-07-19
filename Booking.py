@@ -427,6 +427,9 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         
         if hotelcode_array!=[]:
             prname = str(hotelcode)+'_'+str(websitecode)+'_'+str(Checkin)+'_'+str(file_dt)+'.parquet'
+            print('prname:',prname)
+            print('Checkin:',Checkin)
+            print('Ratedate:',RateDate)
             if not os.path.exists(prname):
                 df = pd.DataFrame({"HotelCode": [''],"SubjectHotelcode":[''],"WebsiteName":[''],"dtcollected":[''],"RateDate":[''],"Los": [''],"RoomType": [''],"OnsiteRate": [''],"RateType": [''],"MealInclusion Type": [''],"MaxOccupancy": [''],"Sourceurl":[''],"Currency":[''],"Statuscode":[''],"Yourhotel":[''],"Hotelname":['']})
                 table = pa.Table.from_pandas(df)
