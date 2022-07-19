@@ -424,7 +424,8 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                         insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
                     else:
                         return None
-        
+        print('Checkin:',Checkin)
+        print('Ratedate:',RateDate)
         if hotelcode_array!=[]:
             prname = str(hotelcode)+'_'+str(websitecode)+'_'+str(Checkin)+'_'+str(file_dt)+'.parquet'
             print('prname:',prname)
