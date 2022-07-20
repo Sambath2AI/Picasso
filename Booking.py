@@ -22,44 +22,6 @@ s3 = boto3.client('s3',
     aws_secret_access_key = 'tDaVCpsOUeV1ReSYW7PcRYq4K7F1A4qKwhwO6Wum'
 )
 
-Roomtype_array = []
-Mealinclusion_array = []
-ratetype_array = []
-price_currency_array = []
-Onsiterate_array = []
-shopid_array = []
-hotelcode_array = []
-subjecthotelcode_array = []
-subjecthotelname_array = []
-hotelname_array = []
-websitename_array = []
-Maxocc_array = []
-dtcollected_array = []
-Ratedate_array = []
-LOS_array = []
-Sourceurl_array = []
-Statuscode_array = []
-
-def insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,Ratedate,los,sourceurl,Statuscode,subhotelname,hotelname):
-    Roomtype_array.append(Roomtype)
-    Onsiterate_array.append(Onsiterate)
-    Mealinclusion_array.append(Mealinclusion)
-    ratetype_array.append(ratetype)
-    price_currency_array.append(price_currency)
-    shopid_array.append(shopid)
-    Maxocc_array.append(Maxocc)
-    subjecthotelcode_array.append(subhotelcode)
-    hotelcode_array.append(hotelcode)
-    websitename_array.append(websitename)
-    dtcollected_array.append(dtcollected)
-    Ratedate_array.append(Ratedate)
-    LOS_array.append(los)
-    Sourceurl_array.append(sourceurl)
-    Statuscode_array.append(Statuscode)
-    subjecthotelname_array.append(subhotelname)
-    hotelname_array.append(hotelname)
-    # print(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,Ratedate,los,sourceurl)
-
 def parquet_append(filepath:'Path' or str, df: pd.DataFrame) -> None:
     table_original_file = pq.read_table(source=filepath,  pre_buffer=False, use_threads=True, memory_map=True)
     table_to_append = pa.Table.from_pandas(df)
@@ -94,7 +56,22 @@ Spaceblock_regex_eight = '<div class="bui-alert bui-alert--error".*?>\s*(.*?)\s*
 
 def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelname, hotelname):
     try:
-        print('url:',url)
+        Roomtype_array = []
+        Mealinclusion_array = []
+        ratetype_array = []
+        price_currency_array = []
+        Onsiterate_array = []
+        hotelcode_array = []
+        subjecthotelcode_array = []
+        subjecthotelname_array = []
+        hotelname_array = []
+        websitename_array = []
+        Maxocc_array = []
+        dtcollected_array = []
+        Ratedate_array = []
+        LOS_array = []
+        Sourceurl_array = []
+        Statuscode_array = []
         if "https" not in url:
             url = clean("http","https",url)
         # url = clean(r"PRP", ";", url)
@@ -104,7 +81,6 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         proxyip = ast.literal_eval(proxyip)
         # print('proxyip:',proxyip)
         RateDate = regMatch('checkin=(\d+\-\d+\-\d+).*?checkout', url)
-        print('RateDate:',RateDate)
         # start    = time.time()
         # print('start time:',hotelcode,RateDate,start)
         Checkin = datetime.datetime.strptime(str(RateDate),'%Y-%m-%d').strftime('%Y%m%d')
@@ -112,7 +88,6 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         head = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
         proxy1 = random.choice(proxyip)
         proxies = {"https": "http://%s"% proxy1}
-        print('proxies:',proxies)
         try:
             try:
                 hml = requests.get(url, headers=head, proxies = proxies, verify = False, timeout = 5)
@@ -131,11 +106,8 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                         proxies = {"https": "http://%s"% proxy1}
                         hml = requests.get(url, headers=head, proxies = proxies, verify = False, timeout = 10)
         except Exception as e:
-            print('error:',e)
             return None
-        print("scode: ",hml.status_code)
         if hml.status_code != 200:
-            print('return')
             return None
         
         html = hml.content.decode('utf-8')
@@ -199,10 +171,8 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                             proxies = {"https": "http://%s"% proxy1}
                             hml = requests.get(url_check, headers=head, proxies = proxies, verify = False, timeout = 10)
             except Exception as e:
-                print('Error:',e)
                 return None
             if hml.status_code != 200:
-                print('return')
                 return None
         html = hml.content.decode('utf-8')
         
@@ -218,7 +188,23 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
             if hml.history:
                 if (str(hml.history[0]) == '<Response [301]>' or str(hml.history[0]) == '<Response [302]>') and 'searchresults' in hml.url:
                     statuscode = 203
-                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                    # insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                    Roomtype_array.append(Roomtype)
+                    Onsiterate_array.append(Onsiterate)
+                    Mealinclusion_array.append(Mealinclusion)
+                    ratetype_array.append(ratetype)
+                    price_currency_array.append(price_currency)
+                    Maxocc_array.append(Maxocc)
+                    subjecthotelcode_array.append(subhotelcode)
+                    hotelcode_array.append(hotelcode)
+                    websitename_array.append(websitename)
+                    dtcollected_array.append(dtcollected)
+                    Ratedate_array.append(RateDate)
+                    LOS_array.append(LOS)
+                    Sourceurl_array.append(url)
+                    Statuscode_array.append(statuscode)
+                    subjecthotelname_array.append(subhotelname)
+                    hotelname_array.append(hotelname)
             if hotelcode_array==[]:
                 hotelid = regMatch(r"b_hotel_id: '(.*?)'",html)
                 url = clean('hotelid=\d+', 'hotelid='+str(hotelid), url)
@@ -243,10 +229,8 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                                 proxies = {"https": "http://%s"% proxy1}
                                 hml = requests.get(url, headers=head, proxies = proxies, verify = False, timeout = 10)
                 except Exception as e:
-                    print('Error:',e)
                     return None
                 if hml.status_code != 200:
-                    print('return')
                     return None
                 html = hml.content.decode('utf-8')
                 
@@ -321,29 +305,125 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         if hotelcode_array==[]:
             if 'searchresults' in hml.url:
                 statuscode = 206
-                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
-              
+                # insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                Roomtype_array.append(Roomtype)
+                Onsiterate_array.append(Onsiterate)
+                Mealinclusion_array.append(Mealinclusion)
+                ratetype_array.append(ratetype)
+                price_currency_array.append(price_currency)
+                Maxocc_array.append(Maxocc)
+                subjecthotelcode_array.append(subhotelcode)
+                hotelcode_array.append(hotelcode)
+                websitename_array.append(websitename)
+                dtcollected_array.append(dtcollected)
+                Ratedate_array.append(RateDate)
+                LOS_array.append(LOS)
+                Sourceurl_array.append(url)
+                Statuscode_array.append(statuscode)
+                subjecthotelname_array.append(subhotelname)
+                hotelname_array.append(hotelname)
             elif re.compile(Spaceblock_regex_third).findall(html):
                 props =  re.search(Spaceblock_regex_third, str(html)).group(1)
                 if "taking reservations on our site right now" in props:
                     statuscode = 203
-                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                    # insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                    Roomtype_array.append(Roomtype)
+                    Onsiterate_array.append(Onsiterate)
+                    Mealinclusion_array.append(Mealinclusion)
+                    ratetype_array.append(ratetype)
+                    price_currency_array.append(price_currency)
+                    Maxocc_array.append(Maxocc)
+                    subjecthotelcode_array.append(subhotelcode)
+                    hotelcode_array.append(hotelcode)
+                    websitename_array.append(websitename)
+                    dtcollected_array.append(dtcollected)
+                    Ratedate_array.append(RateDate)
+                    LOS_array.append(LOS)
+                    Sourceurl_array.append(url)
+                    Statuscode_array.append(statuscode)
+                    subjecthotelname_array.append(subhotelname)
+                    hotelname_array.append(hotelname)
         
             elif "This property isn't taking reservations on our site right now" in html  or 'temporarily unavailable on our site, but we found' in html or 'There are no rooms available at this property' in html or 'isnt bookable on our site anymore, but we found some great alternatives for you' in html or "Unfortunately it's not possible to make reservations for this hotel at this time" in html:   
                 statuscode = 203
-                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                # insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                Roomtype_array.append(Roomtype)
+                Onsiterate_array.append(Onsiterate)
+                Mealinclusion_array.append(Mealinclusion)
+                ratetype_array.append(ratetype)
+                price_currency_array.append(price_currency)
+                Maxocc_array.append(Maxocc)
+                subjecthotelcode_array.append(subhotelcode)
+                hotelcode_array.append(hotelcode)
+                websitename_array.append(websitename)
+                dtcollected_array.append(dtcollected)
+                Ratedate_array.append(RateDate)
+                LOS_array.append(LOS)
+                Sourceurl_array.append(url)
+                Statuscode_array.append(statuscode)
+                subjecthotelname_array.append(subhotelname)
+                hotelname_array.append(hotelname)
                 
             elif re.compile(Spaceblock_regex_first).findall(html):
                 if re.compile(Spaceblock_regex_first).findall(html):
                     statuscode = 202
-                    insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                    # insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                    Roomtype_array.append(Roomtype)
+                    Onsiterate_array.append(Onsiterate)
+                    Mealinclusion_array.append(Mealinclusion)
+                    ratetype_array.append(ratetype)
+                    price_currency_array.append(price_currency)
+                    Maxocc_array.append(Maxocc)
+                    subjecthotelcode_array.append(subhotelcode)
+                    hotelcode_array.append(hotelcode)
+                    websitename_array.append(websitename)
+                    dtcollected_array.append(dtcollected)
+                    Ratedate_array.append(RateDate)
+                    LOS_array.append(LOS)
+                    Sourceurl_array.append(url)
+                    Statuscode_array.append(statuscode)
+                    subjecthotelname_array.append(subhotelname)
+                    hotelname_array.append(hotelname)
             elif "For your check-in date, there's a minimum length of stay of" in html:
                 statuscode = 202
-                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                # insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                Roomtype_array.append(Roomtype)
+                Onsiterate_array.append(Onsiterate)
+                Mealinclusion_array.append(Mealinclusion)
+                ratetype_array.append(ratetype)
+                price_currency_array.append(price_currency)
+                Maxocc_array.append(Maxocc)
+                subjecthotelcode_array.append(subhotelcode)
+                hotelcode_array.append(hotelcode)
+                websitename_array.append(websitename)
+                dtcollected_array.append(dtcollected)
+                Ratedate_array.append(RateDate)
+                LOS_array.append(LOS)
+                Sourceurl_array.append(url)
+                Statuscode_array.append(statuscode)
+                subjecthotelname_array.append(subhotelname)
+                hotelname_array.append(hotelname)
+                
             
             elif "Minimum stay for check-in date is" in html:
                 statuscode = 202
-                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                # insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                Roomtype_array.append(Roomtype)
+                Onsiterate_array.append(Onsiterate)
+                Mealinclusion_array.append(Mealinclusion)
+                ratetype_array.append(ratetype)
+                price_currency_array.append(price_currency)
+                Maxocc_array.append(Maxocc)
+                subjecthotelcode_array.append(subhotelcode)
+                hotelcode_array.append(hotelcode)
+                websitename_array.append(websitename)
+                dtcollected_array.append(dtcollected)
+                Ratedate_array.append(RateDate)
+                LOS_array.append(LOS)
+                Sourceurl_array.append(url)
+                Statuscode_array.append(statuscode)
+                subjecthotelname_array.append(subhotelname)
+                hotelname_array.append(hotelname)
             else:
                 if re.compile(r"(?s)b_rooms_available_and_soldout:\s*(.*?\])\s*,\s*b_.*?photo_pid:").findall(html):
                     Curr_reg = re.search("b_selected_currency:\s*'(.*?)'", html) 
@@ -411,33 +491,60 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                                     statuscode = 200
                                 else:
                                     statuscode = 201
-                                insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                                # insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                                Roomtype_array.append(Roomtype)
+                                Onsiterate_array.append(Onsiterate)
+                                Mealinclusion_array.append(Mealinclusion)
+                                ratetype_array.append(ratetype)
+                                price_currency_array.append(price_currency)
+                                Maxocc_array.append(Maxocc)
+                                subjecthotelcode_array.append(subhotelcode)
+                                hotelcode_array.append(hotelcode)
+                                websitename_array.append(websitename)
+                                dtcollected_array.append(dtcollected)
+                                Ratedate_array.append(RateDate)
+                                LOS_array.append(LOS)
+                                Sourceurl_array.append(url)
+                                Statuscode_array.append(statuscode)
+                                subjecthotelname_array.append(subhotelname)
+                                hotelname_array.append(hotelname)
                                     
                 else:
                     statuscode = 202
                     if re.compile(Spaceblock_regex_second).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                        pass
                     elif re.compile(Spaceblock_regex_third).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                        pass
                     elif re.compile(Spaceblock_regex_four).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                        pass
                     elif re.compile(Spaceblock_regex_five).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                        pass
                     elif re.compile(Spaceblock_regex_six).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                        pass
                     elif re.compile(Spaceblock_regex_seven).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                        pass
                     elif re.compile(Spaceblock_regex_eight).findall(html):
-                        insert(Roomtype,Onsiterate,Mealinclusion,ratetype,price_currency,shopid,Maxocc,subhotelcode,hotelcode,websitename,dtcollected,RateDate,LOS,url,statuscode,subhotelname,hotelname)
+                        pass
                     else:
                         return None
-        print('Checkin:',Checkin)
-        print('Ratedate:',RateDate)
+                    Roomtype_array.append(Roomtype)
+                    Onsiterate_array.append(Onsiterate)
+                    Mealinclusion_array.append(Mealinclusion)
+                    ratetype_array.append(ratetype)
+                    price_currency_array.append(price_currency)
+                    Maxocc_array.append(Maxocc)
+                    subjecthotelcode_array.append(subhotelcode)
+                    hotelcode_array.append(hotelcode)
+                    websitename_array.append(websitename)
+                    dtcollected_array.append(dtcollected)
+                    Ratedate_array.append(RateDate)
+                    LOS_array.append(LOS)
+                    Sourceurl_array.append(url)
+                    Statuscode_array.append(statuscode)
+                    subjecthotelname_array.append(subhotelname)
+                    hotelname_array.append(hotelname)
         if hotelcode_array!=[]:
             prname = str(hotelcode)+'_'+str(websitecode)+'_'+str(Checkin)+'_'+str(file_dt)+'.parquet'
-            print('prname:',prname)
-            print('Checkin:',Checkin)
-            print('Ratedate:',RateDate)
             if not os.path.exists(prname):
                 df = pd.DataFrame({"HotelCode": [''],"SubjectHotelcode":[''],"WebsiteName":[''],"dtcollected":[''],"RateDate":[''],"Los": [''],"RoomType": [''],"OnsiteRate": [''],"RateType": [''],"MealInclusion Type": [''],"MaxOccupancy": [''],"Sourceurl":[''],"Currency":[''],"Statuscode":[''],"Yourhotel":[''],"Hotelname":['']})
                 table = pa.Table.from_pandas(df)
