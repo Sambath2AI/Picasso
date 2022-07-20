@@ -94,6 +94,7 @@ Spaceblock_regex_eight = '<div class="bui-alert bui-alert--error".*?>\s*(.*?)\s*
 
 def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelname, hotelname):
     try:
+        print('url:',url)
         if "https" not in url:
             url = clean("http","https",url)
         # url = clean(r"PRP", ";", url)
@@ -103,6 +104,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         proxyip = ast.literal_eval(proxyip)
         # print('proxyip:',proxyip)
         RateDate = regMatch('checkin=(\d+\-\d+\-\d+).*?checkout', url)
+        print('RateDate:',RateDate)
         # start    = time.time()
         # print('start time:',hotelcode,RateDate,start)
         Checkin = datetime.datetime.strptime(str(RateDate),'%Y-%m-%d').strftime('%Y%m%d')
@@ -110,7 +112,7 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
         head = {'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'}
         proxy1 = random.choice(proxyip)
         proxies = {"https": "http://%s"% proxy1}
-        # print('proxies:',proxies)
+        print('proxies:',proxies)
         try:
             try:
                 hml = requests.get(url, headers=head, proxies = proxies, verify = False, timeout = 5)
