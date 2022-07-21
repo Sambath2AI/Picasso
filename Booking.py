@@ -180,8 +180,9 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
             url_currency = regMatch(r'selected_currency=(.*?);', url)
         else:
             url_currency = ''
+        price_currency = url_currency
     
-        Roomtype = Mealinclusion = ratetype = price_currency = ''
+        Roomtype = Mealinclusion = ratetype = ''
         Onsiterate = Maxocc = statuscode =0
         hid = re.sub(r'http.*?hotelid=', '', url)
         if not re.search("hotel_id\s*:\s*'"+str(hid)+"',", html):
@@ -298,10 +299,6 @@ def fetchrates(url, shopid, subhotelcode, hotelcode, proxyip, userid, subhotelna
                         return None
                 html = hml.content.decode('utf-8')
                 
-                if regMatch(r'selected_currency=(.*?);', url):
-                    url_currency = regMatch(r'selected_currency=(.*?);', url)
-                else:
-                    url_currency = ''
         if hotelcode_array==[]:
             if 'searchresults' in hml.url:
                 statuscode = 206
